@@ -86,9 +86,7 @@ async function start() {
   max = parseInt(max);
 
   // Player's number choice
-  let secretNumber = await ask(
-    "\nWhat is your secret number?\nI won't peek, I promise...\n"
-  );
+  let secretNumber = await ask("\nWhat is your secret number?\nI won't peek, I promise...\n");
 
   // Number of guesses
   let guesses = 0;
@@ -104,6 +102,8 @@ async function start() {
     "\nYou entered: " + secretNumber + "\nPress any key to continue...\n"
   );
 
+  secretNumber = parseInt(secretNumber);
+
   // Function for averaging min and max
   function average(min, max) {
     let answer = ((max - min) / 2) + min;
@@ -114,37 +114,34 @@ async function start() {
   // Prompts a guess
   process.stdin.once("data", async function guessNumber() {
     guesses++;
-    let yesNo = await ask(`Is ${average(min, max)} your number? (Y/N)\n`);
+
+    let currentGuess = average(min, max);
+
+    let yesNo = await ask(`Is ${currentGuess} your number? (Y/N)\n`);
     
     while (yesNo.toLowerCase() === "n") {
       // Asks if it is higher or lower
       let hiLow = await ask(
-        `\nIs it Higher (H) or Lower (L) than ${average(min, max)}\n`
+        `\nIs it Higher (H) or Lower (L) than ${currentGuess}\n`
       );
 
       // If higher: guess becomes minimum answer, next guess is average between present guess and maximum answer
       if (hiLow.toLowerCase() === "h") {
-        console.log(secretNumber);
-        console.log(max);
-        console.log(min);
-        if (secretNumber == max) {
+        if (secretNumber === currentGuess) {
           console.log("\nYou're not telling the truth...\n");
           yesNo = "y";
           break;
         }
-        min = secretNumber;
+        min = parseInt(currentGuess);
       }
       // If lower: guess becomes maximum answer, next guess is average between present guess and minimum answer
       else if (hiLow.toLowerCase() === "l") {
-        console.log(secretNumber);
-        console.log(max);
-        console.log(min);
-        if (secretNumber == min) {
+        if (secretNumber === currentGuess) {
           console.log("\nYou're not telling the truth...\n");
           yesNo = "y";
           break;
         }
-        max = secretNumber;
+        max = parseInt(currentGuess);
       }
       // Was not an H or L
       else {
@@ -152,6 +149,7 @@ async function start() {
       }
 
       guesses++;
+      currentGuess = average(min, max);
 
       // Ask if it is the number again
       yesNo = await ask(`\nIs ${average(min, max)} your number? (Y/N)\n`);
@@ -167,6 +165,7 @@ async function start() {
       console.log(
         "\nWhat did you just type???\nYou're done dude\nI can't even...\n"
       );
+      process.exit();
     }
   });
 }
